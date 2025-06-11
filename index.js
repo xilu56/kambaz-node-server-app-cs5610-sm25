@@ -1,9 +1,11 @@
 import "dotenv/config";
-import express from 'express'
+import express from "express";
 import session from "express-session";
-import Hello from "./Hello.js"
-import Lab5 from "./Lab5.js";
 import cors from "cors";
+
+// Import routes (make sure these files exist and paths are correct)
+import Hello from "./Hello.js";
+import Lab5 from "./Lab5.js";
 import UserRoutes from "./Kambaz/Users/routes.js";
 import CourseRoutes from "./Kambaz/Courses/routes.js";
 import ModuleRoutes from "./Kambaz/Modules/routes.js";
@@ -12,23 +14,21 @@ import EnrollmentRoutes from "./Kambaz/Enrollments/routes.js";
 
 const app = express();
 
-// Configure CORS to support cookies and allow both Netlify and Render deployments
+// ✅ CORS: allow credentials and specific origins
 const allowedOrigins = [
   process.env.NETLIFY_URL,
   process.env.RENDER_FRONTEND_URL || "https://kambaz-react-web-app-cs5610-sm25.onrender.com",
-  "http://localhost:5173", // Vite dev server
-  "http://localhost:4000", // Preview server
-  "http://localhost:3000"  // Alternative dev server
-].filter(Boolean); // Remove undefined values
+  "http://localhost:5173",
+  "http://localhost:4000",
+  "http://localhost:3000"
+].filter(Boolean);
 
-app.use(
-  cors({
-    credentials: true,
-    origin: allowedOrigins,
-  })
-);
+app.use(cors({
+  credentials: true,
+  origin: allowedOrigins,
+}));
 
-// Configure sessions
+// ✅ Session config
 const sessionOptions = {
   secret: process.env.SESSION_SECRET || "kambaz",
   resave: false,
@@ -40,21 +40,25 @@ if (process.env.NODE_ENV !== "development") {
   sessionOptions.cookie = {
     sameSite: "none",
     secure: true,
-    domain: process.env.NODE_SERVER_DOMAIN,
+    domain: process.env.NODE_SERVER_DOMAIN, // no protocol
   };
 }
 
 app.use(session(sessionOptions));
+
+// ✅ JSON body parser
 app.use(express.json());
 
-Lab5(app)
-Hello(app)
+// ✅ Route registration
+Hello(app);
+Lab5(app); // make sure Lab5.js exports a function: (app) => { ... }
 UserRoutes(app);
 CourseRoutes(app);
 ModuleRoutes(app);
 AssignmentRoutes(app);
 EnrollmentRoutes(app);
 
+// ✅ Port setup
 const port = process.env.PORT || 4000;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
