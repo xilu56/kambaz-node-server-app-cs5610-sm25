@@ -64,13 +64,13 @@ export default function WorkingWithArrays(app) {
     const completedTodos = todos.filter(t => t.completed === true);
     res.json(completedTodos);
   });
-}
-app.post("/lab5/todos", (req, res) => {
+
+  app.post("/lab5/todos", (req, res) => {
     const newTodo = { ...req.body,  id: new Date().getTime() };
     todos.push(newTodo);
     res.json(newTodo);
   });
-app.delete("/lab5/todos/:id", (req, res) => {
+  app.delete("/lab5/todos/:id", (req, res) => {
     const { id } = req.params;
     const todoIndex = todos.findIndex((t) => t.id === parseInt(id));
     if (todoIndex === -1) {
@@ -80,7 +80,7 @@ app.delete("/lab5/todos/:id", (req, res) => {
     todos.splice(todoIndex, 1);
     res.sendStatus(200);
   });
-app.put("/lab5/todos/:id", (req, res) => {
+  app.put("/lab5/todos/:id", (req, res) => {
     const { id } = req.params;
     const todoIndex = todos.findIndex((t) => t.id === parseInt(id));
     if (todoIndex === -1) {
@@ -90,3 +90,4 @@ app.put("/lab5/todos/:id", (req, res) => {
     todos = todos.map((t) => {});
     res.sendStatus(200);
   });
+}
