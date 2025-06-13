@@ -1,12 +1,7 @@
 import * as dao from "./dao.js";
 import * as courseDao from "../Courses/dao.js";
-import cors from 'cors';
 
 export default function UserRoutes(app) {
-  app.use(cors({
-    origin: 'http://localhost:5173',
-    credentials: true
-  }));
 
   const createUser = (req, res) => {
     const user = dao.createUser(req.body);
