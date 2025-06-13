@@ -10,8 +10,15 @@ import EnrollmentRoutes from "./Kambaz/Enrollments/routes.js";
 import CourseRoutes from "./Kambaz/Courses/routes.js";
 const app = express();
 Hello(app);
+
+// Configure CORS to allow both local development and production
+const allowedOrigins = [
+  'http://localhost:5173', // Local development frontend
+  'https://kambaz-react-web-app-cs5610-sm25.netlify.app', // Production frontend
+];
+
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: allowedOrigins,
   credentials: true
 }));
 app.use(express.json());
