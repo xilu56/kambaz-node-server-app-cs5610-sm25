@@ -76,8 +76,13 @@ export default function UserRoutes(app) {
   };
 
   const updateProfile = (req, res) => {
+    console.log("=== UPDATE PROFILE DEBUG ===");
+    console.log("Session currentUser:", req.session["currentUser"]);
+    console.log("Request body:", req.body);
+    
     const currentUser = req.session["currentUser"];
     if (!currentUser) {
+      console.log("ERROR: No current user in session");
       res.status(401).json({ message: "Not signed in" });
       return;
     }
@@ -85,13 +90,20 @@ export default function UserRoutes(app) {
     const { userId, ...updateData } = req.body;
     const userIdToUpdate = userId || currentUser._id;
     
+    console.log("User ID to update:", userIdToUpdate);
+    console.log("Update data:", updateData);
+    
     // Update the user in the database
     const updatedUser = dao.updateUser(userIdToUpdate, updateData);
+    console.log("Updated user result:", updatedUser);
+    
     if (updatedUser) {
       // Update the session with the new user data
       req.session["currentUser"] = updatedUser;
+      console.log("SUCCESS: Profile updated successfully");
       res.json(updatedUser);
     } else {
+      console.log("ERROR: Failed to update user in DAO");
       res.status(400).json({ message: "Failed to update profile" });
     }
   };
