@@ -9,7 +9,10 @@ import EnrollmentRoutes from "./Kambaz/Enrollments/routes.js";
 import CourseRoutes from "./Kambaz/Courses/routes.js";
 const app = express();
 Hello(app);
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}));
 app.use(express.json());
 Lab5(app);
 UserRoutes(app);
@@ -17,4 +20,4 @@ ModuleRoutes(app);
 AssignmentRoutes(app);
 EnrollmentRoutes(app);
 CourseRoutes(app);
-app.listen(process.env.PORT || 4000)
+app.listen(process.env.PORT)
