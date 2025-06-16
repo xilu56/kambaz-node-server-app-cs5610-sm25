@@ -3,11 +3,16 @@ import Lab5 from "./Lab5/index.js";
 import Hello from "./Hello.js";
 import cors from "cors";
 import session from "express-session";
+import mongoose from "mongoose";
 import UserRoutes from "./Kambaz/Users/routes.js";
 import ModuleRoutes from "./Kambaz/Modules/routes.js";
 import AssignmentRoutes from "./Kambaz/Assignments/routes.js";
 import EnrollmentRoutes from "./Kambaz/Enrollments/routes.js";
 import CourseRoutes from "./Kambaz/Courses/routes.js";
+
+const CONNECTION_STRING = process.env.MONGO_CONNECTION_STRING || "mongodb://127.0.0.1:27017/Kambaz";
+mongoose.connect(CONNECTION_STRING);
+
 const app = express();
 Hello(app);
 
@@ -35,10 +40,12 @@ app.use(session({
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
+
 Lab5(app);
 UserRoutes(app);
 ModuleRoutes(app);
 AssignmentRoutes(app);
 EnrollmentRoutes(app);
 CourseRoutes(app);
-app.listen(process.env.PORT)
+
+app.listen(process.env.PORT || 4000);
