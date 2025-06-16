@@ -23,14 +23,7 @@ export const findAllUsers = async () => {
   }
 };
 
-export const findUserById = async (userId) => {
-  try {
-    const user = await model.findById(userId);
-    return user;
-  } catch (error) {
-    throw error;
-  }
-};
+export const findUserById = (userId) => model.findOne({ _id: userId });
 
 export const findUserByUsername = async (username) => {
   try {
@@ -54,7 +47,7 @@ export const updateUser = async (userId, user) => {
   try {
     const result = await model.updateOne({ _id: userId }, { $set: user });
     if (result.modifiedCount > 0) {
-      const updatedUser = await model.findById(userId);
+      const updatedUser = await model.findOne({ _id: userId });
       return updatedUser;
     }
     return null;

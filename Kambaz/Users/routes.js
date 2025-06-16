@@ -8,11 +8,11 @@ export default function UserRoutes(app) {
     res.json(user);
   };
 
-  const deleteUser = (req, res) => {
-    const { userId } = req.params;
-    dao.deleteUser(userId);
-    res.sendStatus(200);
+  const deleteUser = async (req, res) => {
+      const status = await dao.deleteUser(req.params.userId);
+      res.json(status);
   };
+
 
   const findAllUsers = async (req, res) => {
     const { role, name } = req.query;
@@ -30,9 +30,8 @@ export default function UserRoutes(app) {
     res.json(users);
   };
 
-  const findUserById = (req, res) => {
-    const { userId } = req.params;
-    const user = dao.findUserById(userId);
+  const findUserById = async (req, res) => {
+    const user = await dao.findUserById(req.params.userId);
     res.json(user);
   };
 
