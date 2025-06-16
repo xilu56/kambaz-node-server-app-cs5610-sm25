@@ -1,17 +1,9 @@
 import model from "./model.js";
+import { v4 as uuidv4 } from 'uuid';
 
 export const createUser = async (user) => {
-  try {
-    // Generate a unique ID if not provided
-    if (!user._id) {
-      // Generate a simple numeric ID based on timestamp and random number
-      user._id = Date.now().toString() + Math.floor(Math.random() * 1000).toString();
-    }
-    const newUser = await model.create(user);
-    return newUser;
-  } catch (error) {
-    throw error;
-  }
+  const newUser = { ...user, _id: uuidv4() };
+  return await model.create(newUser);
 };
 
 export const findAllUsers = async () => {

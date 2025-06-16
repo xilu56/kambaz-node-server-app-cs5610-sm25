@@ -3,8 +3,8 @@ import * as courseDao from "../Courses/dao.js";
 
 export default function UserRoutes(app) {
 
-  const createUser = (req, res) => {
-    const user = dao.createUser(req.body);
+  const createUser = async (req, res) => {
+    const user = await dao.createUser(req.body);
     res.json(user);
   };
 
