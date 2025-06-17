@@ -83,7 +83,7 @@ export default function UserRoutes(app) {
     res.json(currentUser);
   };
 
-  const updateProfile = (req, res) => {
+  const updateProfile = async (req, res) => {
     console.log("=== UPDATE PROFILE DEBUG ===");
     console.log("Session currentUser:", req.session["currentUser"]);
     console.log("Request body:", req.body);
@@ -95,24 +95,30 @@ export default function UserRoutes(app) {
       return;
     }
 
-    const { userId, ...updateData } = req.body;
-    const userIdToUpdate = userId || currentUser._id;
-    
-    console.log("User ID to update:", userIdToUpdate);
-    console.log("Update data:", updateData);
-    
-    // Update the user in the database
-    const updatedUser = dao.updateUser(userIdToUpdate, updateData);
-    console.log("Updated user result:", updatedUser);
-    
-    if (updatedUser) {
-      // Update the session with the new user data
-      req.session["currentUser"] = updatedUser;
-      console.log("SUCCESS: Profile updated successfully");
-      res.json(updatedUser);
-    } else {
-      console.log("ERROR: Failed to update user in DAO");
-      res.status(400).json({ message: "Failed to update profile" });
+    try {
+      const { userId, ...updateData } = req.body;
+      const userIdToUpdate = userId || currentUser._id;
+      
+      console.log("User ID to update:", userIdToUpdate);
+      console.log("Update data:", updateData);
+      
+      // Update the user in the database
+      const updatedUser = await dao.updateUser(userIdToUpdate, updateData);
+      console.log("Updated user result:", updatedUser);
+      
+      if (updatedUser) {
+        // Update the session with the new user data
+        const newUserData = { ...currentUser, ...updateData };
+        req.session["currentUser"] = newUserData;
+        console.log("SUCCESS: Profile updated successfully");
+        res.json(newUserData);
+      } else {
+        console.log("ERROR: Failed to update user in DAO");
+        res.status(400).json({ message: "Failed to update profile" });
+      }
+    } catch (error) {
+      console.error("ERROR: Exception in updateProfile:", error);
+      res.status(500).json({ message: "Internal server error" });
     }
   };
 

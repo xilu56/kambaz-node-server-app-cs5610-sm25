@@ -14,6 +14,9 @@ import CourseRoutes from "./Kambaz/Courses/routes.js";
 import Database from "./Kambaz/Database/index.js";
 import CourseModel from "./Kambaz/Courses/model.js";
 import ModuleModel from "./Kambaz/Modules/model.js";
+import EnrollmentModel from "./Kambaz/Enrollments/model.js";
+import UserModel from "./Kambaz/Users/model.js";
+import AssignmentModel from "./Kambaz/Assignments/model.js";
 
 const CONNECTION_STRING = process.env.MONGO_CONNECTION_STRING;
 
@@ -36,8 +39,11 @@ const initializeDatabase = async () => {
     // Check if data already exists
     const existingCourses = await CourseModel.countDocuments();
     const existingModules = await ModuleModel.countDocuments();
+    const existingUsers = await UserModel.countDocuments();
+    const existingEnrollments = await EnrollmentModel.countDocuments();
+    const existingAssignments = await AssignmentModel.countDocuments();
     
-    console.log(`Found ${existingCourses} courses and ${existingModules} modules in database`);
+    console.log(`Found ${existingCourses} courses, ${existingModules} modules, ${existingUsers} users, ${existingEnrollments} enrollments, ${existingAssignments} assignments in database`);
     
     // Only initialize if database is empty
     if (existingCourses === 0) {
@@ -50,6 +56,24 @@ const initializeDatabase = async () => {
       console.log("Initializing modules...");
       await ModuleModel.insertMany(Database.modules);
       console.log(`Inserted ${Database.modules.length} modules`);
+    }
+    
+    if (existingUsers === 0) {
+      console.log("Initializing users...");
+      await UserModel.insertMany(Database.users);
+      console.log(`Inserted ${Database.users.length} users`);
+    }
+    
+    if (existingEnrollments === 0) {
+      console.log("Initializing enrollments...");
+      await EnrollmentModel.insertMany(Database.enrollments);
+      console.log(`Inserted ${Database.enrollments.length} enrollments`);
+    }
+    
+    if (existingAssignments === 0) {
+      console.log("Initializing assignments...");
+      await AssignmentModel.insertMany(Database.assignments);
+      console.log(`Inserted ${Database.assignments.length} assignments`);
     }
     
     console.log("Database initialization complete");
@@ -100,8 +124,8 @@ app.use(session({
 
 Lab5(app);
 UserRoutes(app);
-ModuleRoutes(app);
 AssignmentRoutes(app);
+ModuleRoutes(app);
 EnrollmentRoutes(app);
 CourseRoutes(app);
 
