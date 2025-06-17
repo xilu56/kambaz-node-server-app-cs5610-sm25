@@ -9,6 +9,8 @@ import ModuleRoutes from "./Kambaz/Modules/routes.js";
 import AssignmentRoutes from "./Kambaz/Assignments/routes.js";
 import EnrollmentRoutes from "./Kambaz/Enrollments/routes.js";
 import CourseRoutes from "./Kambaz/Courses/routes.js";
+import "dotenv/config";
+
 
 // Import database data
 import Database from "./Kambaz/Database/index.js";
