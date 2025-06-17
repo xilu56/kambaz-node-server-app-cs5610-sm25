@@ -11,7 +11,9 @@ export async function findUsersForCourse(courseId) {
 }
 
 export function enrollUserInCourse(user, course) {
+ console.log(`DAO: Enrolling user ${user} in course ${course}`);
  const newEnrollment = { user, course, _id: `${user}-${course}` };
+ console.log(`DAO: Creating enrollment:`, newEnrollment);
  return model.create(newEnrollment);
 }
 
@@ -24,7 +26,12 @@ export const findAllEnrollments = async () => await model.find();
 
 export const findEnrollmentById = async (enrollmentId) => await model.findById(enrollmentId);
 
-export const findEnrollmentsForUser = async (userId) => await model.find({ user: userId });
+export const findEnrollmentsForUser = async (userId) => {
+  console.log(`DAO: Finding enrollments for user ${userId}`);
+  const enrollments = await model.find({ user: userId });
+  console.log(`DAO: Found ${enrollments.length} enrollments for user ${userId}`);
+  return enrollments;
+};
 
 export const findEnrollmentsForCourse = async (courseId) => await model.find({ course: courseId });
 

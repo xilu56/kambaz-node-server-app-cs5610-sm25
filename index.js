@@ -123,10 +123,22 @@ app.use(session({
 }));
 
 Lab5(app);
+
+// Register routes in specific order to avoid conflicts
+console.log("Registering routes...");
 UserRoutes(app);
-AssignmentRoutes(app);
-ModuleRoutes(app);
+console.log("User routes registered");
+
 EnrollmentRoutes(app);
+console.log("Enrollment routes registered");
+
+AssignmentRoutes(app);
+console.log("Assignment routes registered");
+
+ModuleRoutes(app);
+console.log("Module routes registered");
+
 CourseRoutes(app);
+console.log("Course routes registered");
 
 app.listen(process.env.PORT || 4000);
