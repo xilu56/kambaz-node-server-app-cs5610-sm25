@@ -25,8 +25,14 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
-// Check if running in production environment
-const isProduction = process.env.NODE_ENV === "production" || process.env.RENDER;
+// Check if running in production environment  
+const isProduction = process.env.NODE_ENV === "production" || process.env.RENDER || process.env.PORT;
+
+console.log("=== SESSION CONFIG DEBUG ===");
+console.log("NODE_ENV:", process.env.NODE_ENV);
+console.log("RENDER:", process.env.RENDER);
+console.log("PORT:", process.env.PORT);
+console.log("isProduction:", isProduction);
 
 app.use(session({
   secret: process.env.SESSION_SECRET || "kambaz-secret-key",
@@ -36,7 +42,8 @@ app.use(session({
     secure: isProduction, // true in production with HTTPS
     httpOnly: true,
     sameSite: isProduction ? "none" : "lax", 
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    domain: isProduction ? undefined : undefined // Let browser decide
   }
 }));
 Lab5(app);
