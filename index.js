@@ -39,9 +39,9 @@ app.use(session({
   resave: false,
   saveUninitialized: true, // Changed to true to ensure cookie is set
   cookie: {
-    secure: isProduction, // true in production with HTTPS
+    secure: false, // Temporarily disabled for debugging
     httpOnly: false, // Changed to false for debugging
-    sameSite: "none",
+    sameSite: "lax", // Temporarily changed from "none"
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     domain: undefined // Let browser decide
   }

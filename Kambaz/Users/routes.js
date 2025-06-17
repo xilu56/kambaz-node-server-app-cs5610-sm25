@@ -51,6 +51,7 @@ export default function UserRoutes(app) {
     console.log("User-Agent:", req.headers['user-agent']);
     console.log("Session ID before signin:", req.sessionID);
     console.log("Session data before signin:", req.session);
+    console.log("Cookies sent by browser:", req.headers.cookie);
     
     const { username, password } = req.body;
     const currentUser = dao.findUserByCredentials(username, password);
@@ -58,8 +59,16 @@ export default function UserRoutes(app) {
       req.session["currentUser"] = currentUser;
       console.log("Session ID after signin:", req.sessionID);
       console.log("Session data after signin:", req.session);
-      console.log("SUCCESS: User signed in successfully");
-      res.json(currentUser);
+      
+      // Force session save and log response headers
+      req.session.save((err) => {
+        if (err) console.log("Session save error:", err);
+        else console.log("Session saved successfully");
+        
+        console.log("Response headers being sent:", res.getHeaders());
+        console.log("SUCCESS: User signed in successfully");
+        res.json(currentUser);
+      });
     } else {
       console.log("ERROR: Invalid credentials");
       res.status(401).json({ message: "Unable to login. Try again later." });
