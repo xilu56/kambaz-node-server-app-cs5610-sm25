@@ -10,11 +10,50 @@ import AssignmentRoutes from "./Kambaz/Assignments/routes.js";
 import EnrollmentRoutes from "./Kambaz/Enrollments/routes.js";
 import CourseRoutes from "./Kambaz/Courses/routes.js";
 
+// Import database data
+import Database from "./Kambaz/Database/index.js";
+import CourseModel from "./Kambaz/Courses/model.js";
+import ModuleModel from "./Kambaz/Modules/model.js";
+
 const CONNECTION_STRING = process.env.MONGO_CONNECTION_STRING || "mongodb://127.0.0.1:27017/Kambaz";
 mongoose.connect(CONNECTION_STRING);
 
 const app = express();
 Hello(app);
+
+// Initialize database with sample data
+const initializeDatabase = async () => {
+  try {
+    // Check if data already exists
+    const existingCourses = await CourseModel.countDocuments();
+    const existingModules = await ModuleModel.countDocuments();
+    
+    console.log(`Found ${existingCourses} courses and ${existingModules} modules in database`);
+    
+    // Only initialize if database is empty
+    if (existingCourses === 0) {
+      console.log("Initializing courses...");
+      await CourseModel.insertMany(Database.courses);
+      console.log(`Inserted ${Database.courses.length} courses`);
+    }
+    
+    if (existingModules === 0) {
+      console.log("Initializing modules...");
+      await ModuleModel.insertMany(Database.modules);
+      console.log(`Inserted ${Database.modules.length} modules`);
+    }
+    
+    console.log("Database initialization complete");
+  } catch (error) {
+    console.error("Error initializing database:", error);
+  }
+};
+
+// Initialize database after connection
+mongoose.connection.once('open', () => {
+  console.log('Connected to MongoDB');
+  initializeDatabase();
+});
 
 // Configure CORS to allow both local development and production
 const allowedOrigins = [

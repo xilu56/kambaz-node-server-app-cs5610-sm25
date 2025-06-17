@@ -115,18 +115,23 @@ export default function UserRoutes(app) {
     }
   };
 
-  const findCoursesForEnrolledUser = (req, res) => {
-    let { userId } = req.params;
-    if (userId === "current") {
-      const currentUser = req.session["currentUser"];
-      if (!currentUser) {
-        res.sendStatus(401);
-        return;
+  const findCoursesForEnrolledUser = async (req, res) => {
+    try {
+      let { userId } = req.params;
+      if (userId === "current") {
+        const currentUser = req.session["currentUser"];
+        if (!currentUser) {
+          res.sendStatus(401);
+          return;
+        }
+        userId = currentUser._id;
       }
-      userId = currentUser._id;
+      const courses = await courseDao.findCoursesForEnrolledUser(userId);
+      res.json(courses);
+    } catch (error) {
+      console.error("Error fetching courses for user:", error);
+      res.status(500).json({ message: "Error fetching courses" });
     }
-    const courses = courseDao.findCoursesForEnrolledUser(userId);
-    res.json(courses);
   };
 
   // Register routes - IMPORTANT: specific routes before parameterized routes

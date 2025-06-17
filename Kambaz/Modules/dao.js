@@ -1,22 +1,48 @@
-import db from "../Database/index.js";
+import { v4 as uuidv4 } from "uuid";
+import model from "./model.js";
 
-export const findAllModules = () => db.modules;
+export function findModulesForCourse(courseId) {
+ return model.find({ course: courseId });
+}
 
-export const findModuleById = (moduleId) => db.modules.find((module) => module._id === moduleId);
+export function createModule(module) {
+ const newModule = { ...module, _id: uuidv4() };
+ return model.create(newModule);
+}
 
-export const findModulesForCourse = (courseId) => db.modules.filter((module) => module.course === courseId);
+export function deleteModule(moduleId) {
+ return model.deleteOne({ _id: moduleId });
+}
 
-export const createModule = (module) => {
-  const newModule = { ...module, _id: new Date().getTime().toString() };
-  db.modules = [...db.modules, newModule];
-  return newModule;
-};
+export async function updateModule(moduleId, moduleUpdates) {
+  try {
+    // Remove fields that shouldn't be updated
+    const { __v, ...safeUpdates } = moduleUpdates;
+    
+    // Use $set to ensure proper update
+    const result = await model.updateOne(
+      { _id: moduleId }, 
+      { $set: safeUpdates }
+    );
+    
+    console.log(`Update result for module ${moduleId}:`, result);
+    
+    // Return the updated document
+    if (result.matchedCount > 0) {
+      return await model.findById(moduleId);
+    } else {
+      throw new Error("Module not found");
+    }
+  } catch (error) {
+    console.error("Error in updateModule:", error);
+    throw error;
+  }
+}
 
-export const updateModule = (moduleId, module) => {
-  db.modules = db.modules.map((m) => (m._id === moduleId ? { ...module, _id: moduleId } : m));
-  return { ...module, _id: moduleId };
-};
+export async function findAllModules() {
+  return await model.find();
+}
 
-export const deleteModule = (moduleId) => {
-  db.modules = db.modules.filter((module) => module._id !== moduleId);
-}; 
+export async function findModuleById(moduleId) {
+  return await model.findById(moduleId);
+}
