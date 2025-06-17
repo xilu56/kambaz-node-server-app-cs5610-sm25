@@ -16,7 +16,16 @@ import CourseModel from "./Kambaz/Courses/model.js";
 import ModuleModel from "./Kambaz/Modules/model.js";
 
 const CONNECTION_STRING = process.env.MONGO_CONNECTION_STRING;
-mongoose.connect(CONNECTION_STRING);
+
+// Add connection options for production
+const connectionOptions = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+  socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+};
+
+mongoose.connect(CONNECTION_STRING, connectionOptions);
 
 const app = express();
 Hello(app);
@@ -53,6 +62,15 @@ const initializeDatabase = async () => {
 mongoose.connection.once('open', () => {
   console.log('Connected to MongoDB');
   initializeDatabase();
+});
+
+// Add error handling for MongoDB connection
+mongoose.connection.on('error', (error) => {
+  console.error('MongoDB connection error:', error);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('MongoDB disconnected');
 });
 
 // Configure CORS to allow both local development and production
