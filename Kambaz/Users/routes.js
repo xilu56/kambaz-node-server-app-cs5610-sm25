@@ -46,12 +46,22 @@ export default function UserRoutes(app) {
   };
 
   const signin = (req, res) => {
+    console.log("=== SIGNIN DEBUG ===");
+    console.log("Origin:", req.headers.origin);
+    console.log("User-Agent:", req.headers['user-agent']);
+    console.log("Session ID before signin:", req.sessionID);
+    console.log("Session data before signin:", req.session);
+    
     const { username, password } = req.body;
     const currentUser = dao.findUserByCredentials(username, password);
     if (currentUser) {
       req.session["currentUser"] = currentUser;
+      console.log("Session ID after signin:", req.sessionID);
+      console.log("Session data after signin:", req.session);
+      console.log("SUCCESS: User signed in successfully");
       res.json(currentUser);
     } else {
+      console.log("ERROR: Invalid credentials");
       res.status(401).json({ message: "Unable to login. Try again later." });
     }
   };
