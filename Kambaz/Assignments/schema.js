@@ -7,9 +7,12 @@ const assignmentSchema = new mongoose.Schema(
     course: { type: String, ref: "CourseModel", required: true },
     description: String,
     points: { type: Number, default: 100 },
-    dueDate: Date,
+    dueDate: mongoose.Schema.Types.Mixed, // Allow both Date and String
     availableDate: Date,
+    availableFrom: String, // Support legacy field
     availableUntilDate: Date,
+    module: String, // Support legacy field
+    status: String, // Support legacy field
     submissionType: {
       type: String,
       enum: ["ONLINE", "ON_PAPER"],
@@ -27,7 +30,7 @@ const assignmentSchema = new mongoose.Schema(
     },
     published: { type: Boolean, default: false }
   },
-  { collection: "assignments" }
+  { collection: "assignments", strict: false } // Allow additional fields
 );
 
 export default assignmentSchema; 
