@@ -15,7 +15,7 @@ import Database from "./Kambaz/Database/index.js";
 import CourseModel from "./Kambaz/Courses/model.js";
 import ModuleModel from "./Kambaz/Modules/model.js";
 
-const CONNECTION_STRING = process.env.MONGO_CONNECTION_STRING || "mongodb://127.0.0.1:27017/Kambaz";
+const CONNECTION_STRING = process.env.MONGO_CONNECTION_STRING;
 mongoose.connect(CONNECTION_STRING);
 
 const app = express();
