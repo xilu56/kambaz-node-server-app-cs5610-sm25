@@ -37,13 +37,13 @@ console.log("isProduction:", isProduction);
 app.use(session({
   secret: process.env.SESSION_SECRET || "kambaz-secret-key",
   resave: false,
-  saveUninitialized: false,
+  saveUninitialized: true, // Changed to true to ensure cookie is set
   cookie: {
     secure: isProduction, // true in production with HTTPS
-    httpOnly: true,
+    httpOnly: false, // Changed to false for debugging
     sameSite: "none",
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    domain: isProduction ? undefined : undefined // Let browser decide
+    domain: undefined // Let browser decide
   }
 }));
 Lab5(app);
