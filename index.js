@@ -41,7 +41,7 @@ app.use(session({
   cookie: {
     secure: isProduction, // true in production with HTTPS
     httpOnly: true,
-    sameSite: isProduction ? "none" : "lax", 
+    sameSite: "none",
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     domain: isProduction ? undefined : undefined // Let browser decide
   }
