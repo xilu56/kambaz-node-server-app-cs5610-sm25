@@ -33,6 +33,7 @@ const connectionOptions = {
 mongoose.connect(CONNECTION_STRING, connectionOptions);
 
 const app = express();
+app.set("trust proxy", 1);
 Hello(app);
 
 // Initialize database with sample data
