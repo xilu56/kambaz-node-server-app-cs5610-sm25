@@ -25,14 +25,17 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+// Check if running in production environment
+const isProduction = process.env.NODE_ENV === "production" || process.env.RENDER;
+
 app.use(session({
-  secret: "kambaz-secret-key",
+  secret: process.env.SESSION_SECRET || "kambaz-secret-key",
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false, // set to true in production with HTTPS
+    secure: isProduction, // true in production with HTTPS
     httpOnly: true,
-    sameSite: "none", 
+    sameSite: isProduction ? "none" : "lax", 
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
