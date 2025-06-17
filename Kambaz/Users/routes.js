@@ -91,7 +91,11 @@ export default function UserRoutes(app) {
 
   const updateProfile = (req, res) => {
     console.log("=== UPDATE PROFILE DEBUG ===");
+    console.log("Origin:", req.headers.origin);
+    console.log("Session ID:", req.sessionID);
+    console.log("Cookies sent by browser:", req.headers.cookie);
     console.log("Session currentUser:", req.session["currentUser"]);
+    console.log("Session data:", req.session);
     console.log("Request body:", req.body);
     
     const currentUser = req.session["currentUser"];
