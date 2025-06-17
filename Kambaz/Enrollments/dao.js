@@ -1,32 +1,31 @@
-import db from "../Database/index.js";
+import model from "./model.js";
 
-export const findAllEnrollments = () => db.enrollments;
+export async function findCoursesForUser(userId) {
+ const enrollments = await model.find({ user: userId }).populate("course");
+ return enrollments.map((enrollment) => enrollment.course);
+}
 
-export const findEnrollmentById = (enrollmentId) => db.enrollments.find((enrollment) => enrollment._id === enrollmentId);
+export async function findUsersForCourse(courseId) {
+ const enrollments = await model.find({ course: courseId }).populate("user");
+ return enrollments.map((enrollment) => enrollment.user);
+}
 
-export const findEnrollmentsForUser = (userId) => db.enrollments.filter((enrollment) => enrollment.user === userId);
+export function enrollUserInCourse(user, course) {
+ const newEnrollment = { user, course, _id: `${user}-${course}` };
+ return model.create(newEnrollment);
+}
 
-export const findEnrollmentsForCourse = (courseId) => db.enrollments.filter((enrollment) => enrollment.course === courseId);
+export function unenrollUserFromCourse(user, course) {
+ return model.deleteOne({ user, course });
+}
 
-export const enrollUserInCourse = (userId, courseId) => {
-  // Check if enrollment already exists to prevent duplicates
-  const existingEnrollment = db.enrollments.find((enrollment) => 
-    enrollment.user === userId && enrollment.course === courseId
-  );
-  
-  if (existingEnrollment) {
-    return existingEnrollment;
-  }
-  
-  const newEnrollment = { _id: new Date().getTime().toString(), user: userId, course: courseId };
-  db.enrollments = [...db.enrollments, newEnrollment];
-  return newEnrollment;
-};
+// Keep backward compatibility functions
+export const findAllEnrollments = async () => await model.find();
 
-export const unenrollUserFromCourse = (userId, courseId) => {
-  db.enrollments = db.enrollments.filter((enrollment) => !(enrollment.user === userId && enrollment.course === courseId));
-};
+export const findEnrollmentById = async (enrollmentId) => await model.findById(enrollmentId);
 
-export const deleteEnrollment = (enrollmentId) => {
-  db.enrollments = db.enrollments.filter((enrollment) => enrollment._id !== enrollmentId);
-}; 
+export const findEnrollmentsForUser = async (userId) => await model.find({ user: userId });
+
+export const findEnrollmentsForCourse = async (courseId) => await model.find({ course: courseId });
+
+export const deleteEnrollment = async (enrollmentId) => await model.deleteOne({ _id: enrollmentId }); 

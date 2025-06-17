@@ -1,22 +1,39 @@
-import db from "../Database/index.js";
+import model from "./model.js";
 
-export const findAllAssignments = () => db.assignments;
+export const findAllAssignments = async () => {
+  const assignments = await model.find();
+  return assignments;
+};
 
-export const findAssignmentById = (assignmentId) => db.assignments.find((assignment) => assignment._id === assignmentId);
+export const findAssignmentById = async (assignmentId) => {
+  const assignment = await model.findById(assignmentId);
+  return assignment;
+};
 
-export const findAssignmentsForCourse = (courseId) => db.assignments.filter((assignment) => assignment.course === courseId);
+export const findAssignmentsForCourse = async (courseId) => {
+  const assignments = await model.find({ course: courseId });
+  return assignments;
+};
 
-export const createAssignment = (assignment) => {
-  const newAssignment = { ...assignment, _id: new Date().getTime().toString() };
-  db.assignments = [...db.assignments, newAssignment];
+export const createAssignment = async (assignment) => {
+  // Generate ID if not provided
+  if (!assignment._id) {
+    assignment._id = new Date().getTime().toString();
+  }
+  const newAssignment = await model.create(assignment);
   return newAssignment;
 };
 
-export const updateAssignment = (assignmentId, assignment) => {
-  db.assignments = db.assignments.map((a) => (a._id === assignmentId ? { ...assignment, _id: assignmentId } : a));
-  return { ...assignment, _id: assignmentId };
+export const updateAssignment = async (assignmentId, assignmentUpdates) => {
+  const updatedAssignment = await model.findByIdAndUpdate(
+    assignmentId,
+    { $set: assignmentUpdates },
+    { new: true, runValidators: true }
+  );
+  return updatedAssignment;
 };
 
-export const deleteAssignment = (assignmentId) => {
-  db.assignments = db.assignments.filter((assignment) => assignment._id !== assignmentId);
+export const deleteAssignment = async (assignmentId) => {
+  const result = await model.deleteOne({ _id: assignmentId });
+  return result;
 }; 

@@ -1,5 +1,6 @@
 import * as dao from "./dao.js";
 import * as courseDao from "../Courses/dao.js";
+import * as enrollmentsDao from "../Enrollments/dao.js";
 
 export default function UserRoutes(app) {
 
@@ -115,23 +116,43 @@ export default function UserRoutes(app) {
     }
   };
 
-  const findCoursesForEnrolledUser = async (req, res) => {
-    try {
-      let { userId } = req.params;
-      if (userId === "current") {
-        const currentUser = req.session["currentUser"];
-        if (!currentUser) {
-          res.sendStatus(401);
-          return;
-        }
-        userId = currentUser._id;
-      }
-      const courses = await courseDao.findCoursesForEnrolledUser(userId);
-      res.json(courses);
-    } catch (error) {
-      console.error("Error fetching courses for user:", error);
-      res.status(500).json({ message: "Error fetching courses" });
+  const findCoursesForUser = async (req, res) => {
+    const currentUser = req.session["currentUser"];
+    if (!currentUser) {
+      res.sendStatus(401);
+      return;
     }
+    if (currentUser.role === "ADMIN") {
+      const courses = await courseDao.findAllCourses();
+      res.json(courses);
+      return;
+    }
+    let { uid } = req.params;
+    if (uid === "current") {
+      uid = currentUser._id;
+    }
+    const courses = await enrollmentsDao.findCoursesForUser(uid);
+    res.json(courses);
+  };
+
+  const enrollUserInCourse = async (req, res) => {
+    let { uid, cid } = req.params;
+    if (uid === "current") {
+      const currentUser = req.session["currentUser"];
+      uid = currentUser._id;
+    }
+    const status = await enrollmentsDao.enrollUserInCourse(uid, cid);
+    res.send(status);
+  };
+
+  const unenrollUserFromCourse = async (req, res) => {
+    let { uid, cid } = req.params;
+    if (uid === "current") {
+      const currentUser = req.session["currentUser"];
+      uid = currentUser._id;
+    }
+    const status = await enrollmentsDao.unenrollUserFromCourse(uid, cid);
+    res.send(status);
   };
 
   // Register routes - IMPORTANT: specific routes before parameterized routes
@@ -142,7 +163,9 @@ export default function UserRoutes(app) {
   app.post("/api/users/signout", signout);
   app.post("/api/users/profile", profile);
   app.put("/api/users/profile", updateProfile);
-  app.get("/api/users/:userId/courses", findCoursesForEnrolledUser);
+  app.post("/api/users/:uid/courses/:cid", enrollUserInCourse);
+  app.delete("/api/users/:uid/courses/:cid", unenrollUserFromCourse);
+  app.get("/api/users/:uid/courses", findCoursesForUser);
   app.get("/api/users/:userId", findUserById);
   app.put("/api/users/:userId", updateUser);
   app.delete("/api/users/:userId", deleteUser);
