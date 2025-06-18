@@ -68,6 +68,20 @@ app.use(session({
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     path: "/", // Explicit path
     domain: undefined // Let browser decide
+  },
+  // Add store debugging
+  store: new session.MemoryStore(),
+  // Add genid function to debug session ID generation
+  genid: (req) => {
+    const cookieSessionId = req.headers.cookie && req.headers.cookie.split(';').find(c => c.trim().startsWith('kambaz.sid='));
+    if (cookieSessionId) {
+      const sessionId = cookieSessionId.split('=')[1];
+      console.log("Using existing session ID from cookie:", sessionId);
+      return sessionId;
+    }
+    const newId = require('uuid').v4();
+    console.log("Generated new session ID:", newId);
+    return newId;
   }
 }));
 
