@@ -1,5 +1,4 @@
 export default [
-  // RS101 - Rocket Propulsion
   {
     "_id": "Q101",
     "title": "Q1 - Rocket Fundamentals",
@@ -154,7 +153,6 @@ export default [
     ],
     "attempts": []
   },
-  // RS102 - Aerodynamics
   {
     "_id": "Q201",
     "title": "Q3 - Fluid Dynamics", 
@@ -255,7 +253,6 @@ export default [
     ],
     "attempts": []
   },
-  // RS103 - Spacecraft Design
   {
     "_id": "Q301",
     "title": "Q4 - Spacecraft Systems",
@@ -411,7 +408,6 @@ export default [
     "attempts": []
   },
 
-  // RS104 - Organic Chemistry
   {
     "_id": "Q401",
     "title": "Q1 - HTML Basic Structures",
@@ -513,7 +509,6 @@ export default [
     "attempts": []
   },
 
-  // RS105 - Inorganic Chemistry
   {
     "_id": "Q501",
     "title": "Q4 - Coordination Chemistry",
@@ -552,8 +547,7 @@ export default [
     ],
     "attempts": []
   },
-
-  // RS106 - Physical Chemistry  
+ 
   {
     "_id": "Q601",
     "title": "Q5 - Thermodynamics",
@@ -633,7 +627,6 @@ export default [
     "attempts": []
   },
 
-  // RS108 - Inter-species Diplomacy
   {
     "_id": "Q801",
     "title": "Q2 - Council Protocols",
