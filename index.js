@@ -41,6 +41,18 @@ app.use((req, res, next) => {
   console.log("URL:", req.url);
   console.log("Origin:", req.headers.origin);
   console.log("Incoming cookies:", req.headers.cookie);
+  
+  // Parse cookie manually to see session ID
+  if (req.headers.cookie) {
+    const cookies = req.headers.cookie.split(';').reduce((acc, cookie) => {
+      const [key, value] = cookie.trim().split('=');
+      acc[key] = value;
+      return acc;
+    }, {});
+    console.log("Parsed cookies:", cookies);
+    console.log("Expected session ID from cookie:", cookies['kambaz.sid']);
+  }
+  
   next();
 });
 
@@ -58,6 +70,15 @@ app.use(session({
     domain: undefined // Let browser decide
   }
 }));
+
+// Add session restoration debugging
+app.use((req, res, next) => {
+  console.log("=== SESSION RESTORATION DEBUG ===");
+  console.log("Session ID assigned:", req.sessionID);
+  console.log("Session data loaded:", req.session);
+  console.log("Current user in session:", req.session ? req.session.currentUser : 'no session');
+  next();
+});
 
 // Add response debugging middleware
 app.use((req, res, next) => {
