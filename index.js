@@ -3,6 +3,7 @@ import Lab5 from "./Lab5/index.js";
 import Hello from "./Hello.js";
 import cors from "cors";
 import session from "express-session";
+import { v4 as uuidv4 } from "uuid";
 import UserRoutes from "./Kambaz/Users/routes.js";
 import ModuleRoutes from "./Kambaz/Modules/routes.js";
 import AssignmentRoutes from "./Kambaz/Assignments/routes.js";
@@ -79,7 +80,7 @@ app.use(session({
       console.log("Using existing session ID from cookie:", sessionId);
       return sessionId;
     }
-    const newId = require('uuid').v4();
+    const newId = uuidv4();
     console.log("Generated new session ID:", newId);
     return newId;
   }
