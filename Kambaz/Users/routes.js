@@ -35,14 +35,41 @@ export default function UserRoutes(app) {
   };
 
   const signup = (req, res) => {
+    console.log("=== SIGNUP DEBUG ===");
+    console.log("Origin:", req.headers.origin);
+    console.log("Session ID before signup:", req.sessionID);
+    console.log("Session data before signup:", req.session);
+    console.log("Cookies sent by browser:", req.headers.cookie);
+    
     const user = dao.findUserByUsername(req.body.username);
     if (user) {
+      console.log("ERROR: Username already taken");
       res.status(400).json({ message: "Username already taken" });
       return;
     }
     const currentUser = dao.createUser(req.body);
     req.session["currentUser"] = currentUser;
-    res.json(currentUser);
+    
+    console.log("Session ID after signup:", req.sessionID);
+    console.log("Session data after signup:", req.session);
+    
+    // Force session save
+    req.session.save((err) => {
+      if (err) {
+        console.log("Session save error:", err);
+      } else {
+        console.log("Session saved successfully");
+      }
+      
+      // Manually set cookie to ensure it's sent
+      const cookieValue = `kambaz.sid=${req.sessionID}; Path=/; HttpOnly=false; Secure=true; SameSite=none`;
+      res.setHeader('Set-Cookie', cookieValue);
+      
+      console.log("Response headers being sent:", res.getHeaders());
+      console.log("Manual cookie set:", cookieValue);
+      console.log("SUCCESS: User signed up successfully");
+      res.json(currentUser);
+    });
   };
 
   const signin = (req, res) => {
