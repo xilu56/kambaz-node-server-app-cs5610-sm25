@@ -34,18 +34,44 @@ console.log("RENDER:", process.env.RENDER);
 console.log("PORT:", process.env.PORT);
 console.log("isProduction:", isProduction);
 
+// Add session debugging middleware
+app.use((req, res, next) => {
+  console.log("=== REQUEST DEBUG ===");
+  console.log("Method:", req.method);
+  console.log("URL:", req.url);
+  console.log("Origin:", req.headers.origin);
+  console.log("Incoming cookies:", req.headers.cookie);
+  next();
+});
+
 app.use(session({
   secret: process.env.SESSION_SECRET || "kambaz-secret-key",
-  resave: false,
+  name: "kambaz.sid", // Custom session name
+  resave: true, // Force session save
   saveUninitialized: true, // Changed to true to ensure cookie is set
   cookie: {
     secure: false, // Temporarily disabled for debugging
     httpOnly: false, // Changed to false for debugging
     sameSite: "lax", // Temporarily changed from "none"
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    path: "/", // Explicit path
     domain: undefined // Let browser decide
   }
 }));
+
+// Add response debugging middleware
+app.use((req, res, next) => {
+  const originalSend = res.send;
+  res.send = function(data) {
+    console.log("=== RESPONSE DEBUG ===");
+    console.log("Status:", res.statusCode);
+    console.log("Response headers:", res.getHeaders());
+    console.log("Session ID:", req.sessionID);
+    console.log("Session exists:", !!req.session);
+    return originalSend.call(this, data);
+  };
+  next();
+});
 Lab5(app);
 UserRoutes(app);
 ModuleRoutes(app);
