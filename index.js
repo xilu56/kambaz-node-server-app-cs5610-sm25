@@ -22,7 +22,7 @@ import UserModel from "./Kambaz/Users/model.js";
 import AssignmentModel from "./Kambaz/Assignments/model.js";
 import QuizModel from "./Kambaz/Quizzes/model.js";
 
-const CONNECTION_STRING = process.env.MONGO_CONNECTION_STRING;
+const CONNECTION_STRING = process.env.MONGO_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kambaz";
 
 // Add connection options for production
 const connectionOptions = {
@@ -32,11 +32,13 @@ const connectionOptions = {
   socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
 };
 
-mongoose.connect(CONNECTION_STRING, connectionOptions);
-
+// Initialize app first
 const app = express();
 app.set("trust proxy", 1);
 Hello(app);
+
+// Store data in memory as fallback
+let memoryDatabase = null;
 
 // Initialize database with sample data
 const initializeDatabase = async () => {
@@ -94,15 +96,41 @@ const initializeDatabase = async () => {
   }
 };
 
-// Initialize database after connection
-mongoose.connection.once('open', () => {
-  console.log('Connected to MongoDB');
-  initializeDatabase();
-});
+// Initialize memory database as fallback
+const initializeMemoryDatabase = () => {
+  console.log('Using in-memory database...');
+  memoryDatabase = {
+    courses: Database.courses,
+    modules: Database.modules, 
+    users: Database.users,
+    enrollments: Database.enrollments,
+    assignments: Database.assignments,
+    quizzes: Database.quizzes
+  };
+  console.log(`Loaded ${memoryDatabase.quizzes.length} quizzes in memory`);
+};
+
+// Try to connect to MongoDB
+const connectDatabase = async () => {
+  try {
+    await mongoose.connect(CONNECTION_STRING, connectionOptions);
+    console.log('Connected to MongoDB');
+    initializeDatabase();
+  } catch (error) {
+    console.warn('MongoDB connection failed, using in-memory database:', error.message);
+    initializeMemoryDatabase();
+  }
+};
+
+// Initialize database connection
+connectDatabase();
 
 // Add error handling for MongoDB connection
 mongoose.connection.on('error', (error) => {
   console.error('MongoDB connection error:', error);
+  if (!memoryDatabase) {
+    initializeMemoryDatabase();
+  }
 });
 
 mongoose.connection.on('disconnected', () => {
@@ -148,8 +176,37 @@ console.log("Enrollment routes registered");
 AssignmentRoutes(app);
 console.log("Assignment routes registered");
 
-QuizRoutes(app);
-console.log("Quiz routes registered");
+// Add fallback quiz routes if using memory database
+app.get("/api/courses/:courseId/quizzes", (req, res) => {
+  const { courseId } = req.params;
+  if (memoryDatabase) {
+    const quizzes = memoryDatabase.quizzes.filter(quiz => quiz.course === courseId);
+    console.log(`Found ${quizzes.length} quizzes for course ${courseId}`);
+    res.json(quizzes);
+  } else {
+    res.status(500).json({ message: "Database not available" });
+  }
+});
+
+app.get("/api/quizzes/:quizId", (req, res) => {
+  const { quizId } = req.params;
+  if (memoryDatabase) {
+    const quiz = memoryDatabase.quizzes.find(quiz => quiz._id === quizId);
+    if (quiz) {
+      res.json(quiz);
+    } else {
+      res.status(404).json({ message: "Quiz not found" });
+    }
+  } else {
+    res.status(500).json({ message: "Database not available" });
+  }
+});
+
+// Only use DAO routes if MongoDB is connected
+if (mongoose.connection.readyState === 1) {
+  QuizRoutes(app);
+  console.log("Quiz routes registered");
+}
 
 ModuleRoutes(app);
 console.log("Module routes registered");
