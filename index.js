@@ -146,7 +146,7 @@ mongoose.connection.on('disconnected', () => {
 const allowedOrigins = [
   'http://localhost:5173', // Local development frontend
   'https://kambaz-react-web-app-cs5610-sm25.netlify.app', // Production frontend
-  'https://project--kambaz-react-web-app-cs5610-sm25.netlify.app/', // Alternative production URL
+  'https://project--kambaz-react-web-app-cs5610-sm25.netlify.app', // Alternative production URL
   /^https:\/\/.*\.netlify\.app$/, // Any Netlify subdomain
   /^https:\/\/.*--kambaz-react-web-app-cs5610-sm25\.netlify\.app$/ // Netlify branch deploys
 ];
