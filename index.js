@@ -50,9 +50,9 @@ app.use(session({
   resave: true, // Force session save
   saveUninitialized: true, // Changed to true to ensure cookie is set
   cookie: {
-    secure: false, // Temporarily disabled for debugging
-    httpOnly: false, // Changed to false for debugging
-    sameSite: "lax", // Temporarily changed from "none"
+    secure: true, // MUST be true for SameSite=none
+    httpOnly: false, // Keep false for debugging
+    sameSite: "none", // Required for cross-site cookies
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     path: "/", // Explicit path
     domain: undefined // Let browser decide

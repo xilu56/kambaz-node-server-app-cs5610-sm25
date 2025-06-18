@@ -66,7 +66,7 @@ export default function UserRoutes(app) {
         else console.log("Session saved successfully");
         
         // Manually set cookie to ensure it's sent
-        const cookieValue = `kambaz.sid=${req.sessionID}; Path=/; HttpOnly=false; Secure=false; SameSite=lax`;
+        const cookieValue = `kambaz.sid=${req.sessionID}; Path=/; HttpOnly=false; Secure=true; SameSite=none`;
         res.setHeader('Set-Cookie', cookieValue);
         
         console.log("Response headers being sent:", res.getHeaders());
