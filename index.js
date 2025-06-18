@@ -9,6 +9,7 @@ import ModuleRoutes from "./Kambaz/Modules/routes.js";
 import AssignmentRoutes from "./Kambaz/Assignments/routes.js";
 import EnrollmentRoutes from "./Kambaz/Enrollments/routes.js";
 import CourseRoutes from "./Kambaz/Courses/routes.js";
+import QuizRoutes from "./Kambaz/Quizzes/routes.js";
 import "dotenv/config";
 
 
@@ -19,6 +20,7 @@ import ModuleModel from "./Kambaz/Modules/model.js";
 import EnrollmentModel from "./Kambaz/Enrollments/model.js";
 import UserModel from "./Kambaz/Users/model.js";
 import AssignmentModel from "./Kambaz/Assignments/model.js";
+import QuizModel from "./Kambaz/Quizzes/model.js";
 
 const CONNECTION_STRING = process.env.MONGO_CONNECTION_STRING;
 
@@ -45,8 +47,9 @@ const initializeDatabase = async () => {
     const existingUsers = await UserModel.countDocuments();
     const existingEnrollments = await EnrollmentModel.countDocuments();
     const existingAssignments = await AssignmentModel.countDocuments();
+    const existingQuizzes = await QuizModel.countDocuments();
     
-    console.log(`Found ${existingCourses} courses, ${existingModules} modules, ${existingUsers} users, ${existingEnrollments} enrollments, ${existingAssignments} assignments in database`);
+    console.log(`Found ${existingCourses} courses, ${existingModules} modules, ${existingUsers} users, ${existingEnrollments} enrollments, ${existingAssignments} assignments, ${existingQuizzes} quizzes in database`);
     
     // Only initialize if database is empty
     if (existingCourses === 0) {
@@ -77,6 +80,12 @@ const initializeDatabase = async () => {
       console.log("Initializing assignments...");
       await AssignmentModel.insertMany(Database.assignments);
       console.log(`Inserted ${Database.assignments.length} assignments`);
+    }
+    
+    if (existingQuizzes === 0) {
+      console.log("Initializing quizzes...");
+      await QuizModel.insertMany(Database.quizzes);
+      console.log(`Inserted ${Database.quizzes.length} quizzes`);
     }
     
     console.log("Database initialization complete");
@@ -138,6 +147,9 @@ console.log("Enrollment routes registered");
 
 AssignmentRoutes(app);
 console.log("Assignment routes registered");
+
+QuizRoutes(app);
+console.log("Quiz routes registered");
 
 ModuleRoutes(app);
 console.log("Module routes registered");
