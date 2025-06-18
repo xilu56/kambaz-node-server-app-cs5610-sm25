@@ -22,7 +22,7 @@ import UserModel from "./Kambaz/Users/model.js";
 import AssignmentModel from "./Kambaz/Assignments/model.js";
 import QuizModel from "./Kambaz/Quizzes/model.js";
 
-const CONNECTION_STRING = process.env.MONGO_CONNECTION_STRING;
+const CONNECTION_STRING = process.env.MONGO_CONNECTION_STRING || "mongodb+srv://xilu56:supersecret@kambaz.mta8dkh.mongodb.net/kambaz";
 
 // Add connection options for production
 const connectionOptions = {
@@ -112,12 +112,17 @@ const initializeMemoryDatabase = () => {
 
 // Try to connect to MongoDB
 const connectDatabase = async () => {
+  console.log('Attempting to connect to MongoDB...');
+  console.log('CONNECTION_STRING exists:', !!CONNECTION_STRING);
+  console.log('NODE_ENV:', process.env.NODE_ENV);
+  
   try {
     await mongoose.connect(CONNECTION_STRING, connectionOptions);
-    console.log('Connected to MongoDB');
+    console.log('✅ Successfully connected to MongoDB');
     initializeDatabase();
   } catch (error) {
-    console.warn('MongoDB connection failed, using in-memory database:', error.message);
+    console.error('❌ MongoDB connection failed:', error.message);
+    console.warn('🔄 Falling back to in-memory database');
     initializeMemoryDatabase();
   }
 };
@@ -141,7 +146,7 @@ mongoose.connection.on('disconnected', () => {
 const allowedOrigins = [
   'http://localhost:5173', // Local development frontend
   'https://kambaz-react-web-app-cs5610-sm25.netlify.app', // Production frontend
-  'https://a6--kambaz-react-web-app-cs5610-sm25.netlify.app/', // Alternative production URL
+  'https://project--kambaz-react-web-app-cs5610-sm25.netlify.app/', // Alternative production URL
   /^https:\/\/.*\.netlify\.app$/, // Any Netlify subdomain
   /^https:\/\/.*--kambaz-react-web-app-cs5610-sm25\.netlify\.app$/ // Netlify branch deploys
 ];
@@ -179,11 +184,25 @@ console.log("Assignment routes registered");
 // Add fallback quiz routes if using memory database
 app.get("/api/courses/:courseId/quizzes", (req, res) => {
   const { courseId } = req.params;
-  if (memoryDatabase) {
+  console.log(`Requesting quizzes for course: ${courseId}`);
+  console.log(`Memory database available: ${!!memoryDatabase}`);
+  console.log(`MongoDB connection state: ${mongoose.connection.readyState}`);
+  
+  if (memoryDatabase && memoryDatabase.quizzes) {
     const quizzes = memoryDatabase.quizzes.filter(quiz => quiz.course === courseId);
-    console.log(`Found ${quizzes.length} quizzes for course ${courseId}`);
+    console.log(`Found ${quizzes.length} quizzes for course ${courseId} in memory`);
     res.json(quizzes);
   } else {
+    console.log("No memory database available, trying to initialize...");
+    // Try to initialize memory database if not already done
+    if (!memoryDatabase) {
+      initializeMemoryDatabase();
+      if (memoryDatabase && memoryDatabase.quizzes) {
+        const quizzes = memoryDatabase.quizzes.filter(quiz => quiz.course === courseId);
+        console.log(`Found ${quizzes.length} quizzes for course ${courseId} after initialization`);
+        return res.json(quizzes);
+      }
+    }
     res.status(500).json({ message: "Database not available" });
   }
 });
