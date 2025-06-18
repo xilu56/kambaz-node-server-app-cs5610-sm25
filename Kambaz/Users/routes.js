@@ -60,12 +60,17 @@ export default function UserRoutes(app) {
       console.log("Session ID after signin:", req.sessionID);
       console.log("Session data after signin:", req.session);
       
-      // Force session save and log response headers
+      // Force session save and manually set cookie
       req.session.save((err) => {
         if (err) console.log("Session save error:", err);
         else console.log("Session saved successfully");
         
+        // Manually set cookie to ensure it's sent
+        const cookieValue = `connect.sid=${req.sessionID}; Path=/; HttpOnly=false; Secure=false; SameSite=lax`;
+        res.setHeader('Set-Cookie', cookieValue);
+        
         console.log("Response headers being sent:", res.getHeaders());
+        console.log("Manual cookie set:", cookieValue);
         console.log("SUCCESS: User signed in successfully");
         res.json(currentUser);
       });
