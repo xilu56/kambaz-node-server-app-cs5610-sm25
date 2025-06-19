@@ -90,7 +90,7 @@ const initializeDatabase = async () => {
       console.log(`Inserted ${Database.quizzes.length} quizzes`);
     }
     
-    console.log("Database initialization complete");
+    console.log("Database initialization complete - Updated user roles to FACULTY/STUDENT only");
   } catch (error) {
     console.error("Error initializing database:", error);
   }
