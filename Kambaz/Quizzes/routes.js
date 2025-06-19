@@ -1,9 +1,25 @@
 import * as dao from "./dao.js";
+import Database from "../Database/index.js";
+import mongoose from "mongoose";
+
+// Memory database for fallback
+let memoryDatabase = {
+  quizzes: Database.quizzes || []
+};
+
+// Helper function to check if MongoDB is available
+const isMongoAvailable = () => mongoose.connection.readyState === 1;
 
 export default function QuizRoutes(app) {
   const findAllQuizzes = async (req, res) => {
     try {
-      const quizzes = await dao.findAllQuizzes();
+      let quizzes;
+      if (isMongoAvailable()) {
+        quizzes = await dao.findAllQuizzes();
+      } else {
+        console.log("Using memory database for findAllQuizzes");
+        quizzes = memoryDatabase.quizzes;
+      }
       res.json(quizzes);
     } catch (error) {
       console.error("Error fetching all quizzes:", error);
@@ -14,7 +30,15 @@ export default function QuizRoutes(app) {
   const findQuizById = async (req, res) => {
     try {
       const { quizId } = req.params;
-      const quiz = await dao.findQuizById(quizId);
+      let quiz;
+      
+      if (isMongoAvailable()) {
+        quiz = await dao.findQuizById(quizId);
+      } else {
+        console.log("Using memory database for findQuizById");
+        quiz = memoryDatabase.quizzes.find(q => q._id === quizId);
+      }
+      
       if (quiz) {
         res.json(quiz);
       } else {
@@ -29,7 +53,15 @@ export default function QuizRoutes(app) {
   const findQuizzesForCourse = async (req, res) => {
     try {
       const { courseId } = req.params;
-      const quizzes = await dao.findQuizzesForCourse(courseId);
+      let quizzes;
+      
+      if (isMongoAvailable()) {
+        quizzes = await dao.findQuizzesForCourse(courseId);
+      } else {
+        console.log("Using memory database for findQuizzesForCourse");
+        quizzes = memoryDatabase.quizzes.filter(q => q.course === courseId);
+      }
+      
       res.json(quizzes);
     } catch (error) {
       console.error("Error fetching quizzes for course:", error);
@@ -39,7 +71,21 @@ export default function QuizRoutes(app) {
 
   const createQuiz = async (req, res) => {
     try {
-      const quiz = await dao.createQuiz(req.body);
+      let quiz;
+      if (isMongoAvailable()) {
+        quiz = await dao.createQuiz(req.body);
+      } else {
+        console.log("Using memory database for createQuiz");
+        quiz = {
+          ...req.body,
+          _id: new Date().getTime().toString(),
+          questions: req.body.questions || [],
+          points: req.body.points || 0,
+          createdAt: new Date(),
+          attempts: []
+        };
+        memoryDatabase.quizzes.push(quiz);
+      }
       res.json(quiz);
     } catch (error) {
       console.error("Error creating quiz:", error);
@@ -51,7 +97,22 @@ export default function QuizRoutes(app) {
     try {
       const { courseId } = req.params;
       const quiz = { ...req.body, course: courseId };
-      const newQuiz = await dao.createQuiz(quiz);
+      let newQuiz;
+      
+      if (isMongoAvailable()) {
+        newQuiz = await dao.createQuiz(quiz);
+      } else {
+        console.log("Using memory database for createQuizForCourse");
+        newQuiz = {
+          ...quiz,
+          _id: new Date().getTime().toString(),
+          questions: quiz.questions || [],
+          points: quiz.points || 0,
+          createdAt: new Date(),
+          attempts: []
+        };
+        memoryDatabase.quizzes.push(newQuiz);
+      }
       res.json(newQuiz);
     } catch (error) {
       console.error("Error creating quiz for course:", error);
@@ -62,7 +123,31 @@ export default function QuizRoutes(app) {
   const updateQuiz = async (req, res) => {
     try {
       const { quizId } = req.params;
-      const updatedQuiz = await dao.updateQuiz(quizId, req.body);
+      let updatedQuiz;
+      
+      if (isMongoAvailable()) {
+        updatedQuiz = await dao.updateQuiz(quizId, req.body);
+      } else {
+        console.log("Using memory database for updateQuiz");
+        const quizIndex = memoryDatabase.quizzes.findIndex(q => q._id === quizId);
+        if (quizIndex >= 0) {
+          memoryDatabase.quizzes[quizIndex] = {
+            ...memoryDatabase.quizzes[quizIndex],
+            ...req.body,
+            updatedAt: new Date()
+          };
+          // Recalculate points if questions are updated
+          if (req.body.questions) {
+            memoryDatabase.quizzes[quizIndex].points = req.body.questions.reduce(
+              (total, question) => total + (question.points || 0), 0
+            );
+          }
+          updatedQuiz = memoryDatabase.quizzes[quizIndex];
+        } else {
+          updatedQuiz = null;
+        }
+      }
+      
       if (updatedQuiz) {
         res.json(updatedQuiz);
       } else {

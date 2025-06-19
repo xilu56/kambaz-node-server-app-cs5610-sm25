@@ -181,51 +181,11 @@ console.log("Enrollment routes registered");
 AssignmentRoutes(app);
 console.log("Assignment routes registered");
 
-// Add fallback quiz routes if using memory database
-app.get("/api/courses/:courseId/quizzes", (req, res) => {
-  const { courseId } = req.params;
-  console.log(`Requesting quizzes for course: ${courseId}`);
-  console.log(`Memory database available: ${!!memoryDatabase}`);
-  console.log(`MongoDB connection state: ${mongoose.connection.readyState}`);
-  
-  if (memoryDatabase && memoryDatabase.quizzes) {
-    const quizzes = memoryDatabase.quizzes.filter(quiz => quiz.course === courseId);
-    console.log(`Found ${quizzes.length} quizzes for course ${courseId} in memory`);
-    res.json(quizzes);
-  } else {
-    console.log("No memory database available, trying to initialize...");
-    // Try to initialize memory database if not already done
-    if (!memoryDatabase) {
-      initializeMemoryDatabase();
-      if (memoryDatabase && memoryDatabase.quizzes) {
-        const quizzes = memoryDatabase.quizzes.filter(quiz => quiz.course === courseId);
-        console.log(`Found ${quizzes.length} quizzes for course ${courseId} after initialization`);
-        return res.json(quizzes);
-      }
-    }
-    res.status(500).json({ message: "Database not available" });
-  }
-});
+// Quiz routes are now handled by QuizRoutes with fallback support
 
-app.get("/api/quizzes/:quizId", (req, res) => {
-  const { quizId } = req.params;
-  if (memoryDatabase) {
-    const quiz = memoryDatabase.quizzes.find(quiz => quiz._id === quizId);
-    if (quiz) {
-      res.json(quiz);
-    } else {
-      res.status(404).json({ message: "Quiz not found" });
-    }
-  } else {
-    res.status(500).json({ message: "Database not available" });
-  }
-});
-
-// Only use DAO routes if MongoDB is connected
-if (mongoose.connection.readyState === 1) {
-  QuizRoutes(app);
-  console.log("Quiz routes registered");
-}
+// Always register Quiz routes - they handle fallback internally
+QuizRoutes(app);
+console.log("Quiz routes registered");
 
 ModuleRoutes(app);
 console.log("Module routes registered");
