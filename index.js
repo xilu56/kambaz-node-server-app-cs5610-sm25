@@ -22,7 +22,7 @@ import UserModel from "./Kambaz/Users/model.js";
 import AssignmentModel from "./Kambaz/Assignments/model.js";
 import QuizModel from "./Kambaz/Quizzes/model.js";
 
-const CONNECTION_STRING = process.env.MONGO_CONNECTION_STRING || "mongodb+srv://xilu56:supersecret@kambaz.mta8dkh.mongodb.net/kambaz";
+const CONNECTION_STRING = process.env.MONGO_CONNECTION_STRING;
 
 // Add connection options for production
 const connectionOptions = {
