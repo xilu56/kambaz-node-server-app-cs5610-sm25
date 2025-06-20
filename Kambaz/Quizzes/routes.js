@@ -76,14 +76,17 @@ export default function QuizRoutes(app) {
         quiz = await dao.createQuiz(req.body);
       } else {
         console.log("Using memory database for createQuiz");
+        console.log("Create quiz request body:", req.body);
+        console.log("Points in request:", req.body.points);
         quiz = {
           ...req.body,
           _id: new Date().getTime().toString(),
           questions: req.body.questions || [],
-          points: req.body.points || 0,
+          points: req.body.points !== undefined ? req.body.points : 0,
           createdAt: new Date(),
           attempts: []
         };
+        console.log("Created quiz with points:", quiz.points);
         memoryDatabase.quizzes.push(quiz);
       }
       res.json(quiz);
@@ -103,14 +106,17 @@ export default function QuizRoutes(app) {
         newQuiz = await dao.createQuiz(quiz);
       } else {
         console.log("Using memory database for createQuizForCourse");
+        console.log("Create quiz for course request:", quiz);
+        console.log("Points in request:", quiz.points);
         newQuiz = {
           ...quiz,
           _id: new Date().getTime().toString(),
           questions: quiz.questions || [],
-          points: quiz.points || 0,
+          points: quiz.points !== undefined ? quiz.points : 0,
           createdAt: new Date(),
           attempts: []
         };
+        console.log("Created quiz for course with points:", newQuiz.points);
         memoryDatabase.quizzes.push(newQuiz);
       }
       res.json(newQuiz);
@@ -129,6 +135,8 @@ export default function QuizRoutes(app) {
         updatedQuiz = await dao.updateQuiz(quizId, req.body);
       } else {
         console.log("Using memory database for updateQuiz");
+        console.log("Update data received:", req.body);
+        console.log("Points in request body:", req.body.points);
         const quizIndex = memoryDatabase.quizzes.findIndex(q => q._id === quizId);
         if (quizIndex >= 0) {
           memoryDatabase.quizzes[quizIndex] = {
@@ -136,12 +144,7 @@ export default function QuizRoutes(app) {
             ...req.body,
             updatedAt: new Date()
           };
-          // Recalculate points if questions are updated
-          if (req.body.questions) {
-            memoryDatabase.quizzes[quizIndex].points = req.body.questions.reduce(
-              (total, question) => total + (question.points || 0), 0
-            );
-          }
+          console.log("Quiz updated in memory database, points:", memoryDatabase.quizzes[quizIndex].points);
           updatedQuiz = memoryDatabase.quizzes[quizIndex];
         } else {
           updatedQuiz = null;

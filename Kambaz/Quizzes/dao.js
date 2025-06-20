@@ -24,17 +24,29 @@ export const createQuiz = async (quiz) => {
   if (!quiz.questions) {
     quiz.questions = [];
   }
-  // Calculate total points based on questions
-  quiz.points = quiz.questions.reduce((total, question) => total + (question.points || 0), 0);
+  // Only calculate points from questions if points is not explicitly provided
+  if (quiz.points === undefined) {
+    quiz.points = quiz.questions.reduce((total, question) => total + (question.points || 0), 0);
+  }
   
+  console.log("Creating quiz with points:", quiz.points);
   const newQuiz = await model.create(quiz);
   return newQuiz;
 };
 
 export const updateQuiz = async (quizId, quizUpdates) => {
-  // Recalculate points if questions are updated
-  if (quizUpdates.questions) {
+  console.log("=== DAO UPDATE QUIZ DEBUG ===");
+  console.log("Quiz ID:", quizId);
+  console.log("Quiz updates:", quizUpdates);
+  console.log("Points in updates:", quizUpdates.points);
+  
+  // Only recalculate points if questions are updated AND points is not explicitly provided
+  if (quizUpdates.questions && quizUpdates.points === undefined) {
+    console.log("Recalculating points from questions");
     quizUpdates.points = quizUpdates.questions.reduce((total, question) => total + (question.points || 0), 0);
+    console.log("Calculated points:", quizUpdates.points);
+  } else if (quizUpdates.points !== undefined) {
+    console.log("Using explicitly provided points:", quizUpdates.points);
   }
   
   const updatedQuiz = await model.findByIdAndUpdate(
@@ -42,6 +54,8 @@ export const updateQuiz = async (quizId, quizUpdates) => {
     { $set: quizUpdates },
     { new: true, runValidators: true }
   );
+  
+  console.log("Updated quiz points:", updatedQuiz?.points);
   return updatedQuiz;
 };
 
